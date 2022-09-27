@@ -1,20 +1,31 @@
-const userModel=require('../models/user.model')
+const userModel = require('../models/user.model');
+const bcrypt = require('bcrypt');
 
-module.exports.signup= async(req,res)=>{
-    const {name ,email , password , age} = req.body
-    await userModel.insertMany({name ,email , password , age})
-    res.json({message:'success'})
-}
+
+module.exports.signup = async (req, res) => {
+    const { name, email, password, age } = req.body
+    const user = await userModel.findOne({ email })
+    if (user) {
+        res.json({ message: "account already exists" })
+    } else {
+        bcrypt.hash(password, 5, async function (err, hash) {
+            await userModel.insertMany({ name, email, password: hash, age })
+            res.json({ message: 'success' })
+            
+        });
+
+    }
+};
 
 
 module.exports.signin = async (req, res) => {
     const { email, password } = req.body;
     let user = await userModel.findOne({ email })
     if (user) {
-        // const match = await bcrypt.compare(password, user.password);
-        if (password == user.password) {
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
             // let token = jwt.sign({role : 'user' , userid : user._id , name : user.name}, 'amr');
-            res.json({ message: "success", token })
+            res.json({ message: "success" })
         } else {
             res.json({ message: "password incorrect" })
         }

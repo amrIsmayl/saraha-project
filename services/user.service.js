@@ -1,5 +1,7 @@
 const userModel = require('../models/user.model');
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+
 
 
 module.exports.signup = async (req, res) => {
@@ -10,8 +12,7 @@ module.exports.signup = async (req, res) => {
     } else {
         bcrypt.hash(password, 5, async function (err, hash) {
             await userModel.insertMany({ name, email, password: hash, age })
-            res.json({ message: 'success' })
-            
+            res.json({ message: 'success' });
         });
 
     }
@@ -24,8 +25,8 @@ module.exports.signin = async (req, res) => {
     if (user) {
         const match = await bcrypt.compare(password, user.password);
         if (match) {
-            // let token = jwt.sign({role : 'user' , userid : user._id , name : user.name}, 'amr');
-            res.json({ message: "success" })
+            let token = jwt.sign({userId:user._id,name:user.name,emailConfirm:user.emailConfirm}, 'amr');
+            res.json({ message: "success" ,token})
         } else {
             res.json({ message: "password incorrect" })
         }

@@ -2,18 +2,15 @@
 const express = require('express')
 const { default: mongoose } = require('mongoose')
 const app = express()
-const port = 3000
+require('dotenv').config()
+const port = process.env.port
 
 app.use(express.json());
 app.use('/users', require('./apis/user.apis'));
 app.use('/messages', require('./apis/message.apis'));
 
-
-
-
-
 mongoose
-    .connect('mongodb://127.0.0.1:27017/sara7a')
+    .connect(process.env.URL)
     .then(() => {
         console.log("database connented");
     })
@@ -22,4 +19,8 @@ mongoose
     });
 
 app.get('/', (req, res) => res.send('Hello World!'));
+
+app.all("*", (req,res) =>{
+    res.json({message:"404"})
+})
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
